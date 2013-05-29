@@ -1,0 +1,43 @@
+<html>
+  <head>
+  <title>Sue's dumb app</title>
+  <script src="jam/require.js"></script>
+  <link rel="stylesheet" href="css/layout.css">
+  <script>
+    require(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
+      console.log("Hellllllllo");
+      console.log(arguments);
+   
+      var CoolView = Backbone.View.extend({
+        render: function() {
+          $("#main").html("<h1>blah blah blah</h1>");
+        }
+      });
+   
+      var theview = new CoolView();
+      theview.render();
+   
+      VideoGame = Backbone.Model.extend({
+        idAttribute: "_id"
+      });
+   
+      VideoGames = Backbone.Collection.extend({
+        model: VideoGame,
+        url: "http://localhost:5984/fun_app/_design/fun_app/_view/by_title?include_docs=true",
+   
+        parse: function(resp) {
+          console.log("GOT GAMES", resp);
+   
+          return resp.rows.map(function(row) {
+            return row.doc;
+          });
+        }
+      });
+    });
+  </script>
+  </head>
+  <body>
+    <div id="main"></div>
+    <div id="nope">oh hai</div>
+  </body>
+</html>
