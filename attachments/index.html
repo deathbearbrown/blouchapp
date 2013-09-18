@@ -1,43 +1,92 @@
 <html>
   <head>
   <title>Sue's dumb app</title>
-  <script src="jam/require.js"></script>
-  <link rel="stylesheet" href="css/layout.css">
+  <script src="./jam/require.js"></script>
+  <link rel="stylesheet" href="./css/layout.css">
   <script>
     require(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
-      console.log("Hellllllllo");
-      console.log(arguments);
-   
-      var CoolView = Backbone.View.extend({
-        render: function() {
-          $("#main").html("<h1>blah blah blah</h1>");
-        }
-      });
-   
-      var theview = new CoolView();
-      theview.render();
-   
-      VideoGame = Backbone.Model.extend({
+      var data ={};
+      //this is your model.  Put the DB you want to save to in here.
+      data.Animal = Backbone.Model.extend({
+        url: "/mycouchapp",
         idAttribute: "_id"
       });
-   
-      VideoGames = Backbone.Collection.extend({
-        model: VideoGame,
-        url: "http://localhost:5984/fun_app/_design/fun_app/_view/by_title?include_docs=true",
-   
+
+      //this is the collection, which can be retrieved from the DV with a view
+      data.Animals = Backbone.Collection.extend({
+        model: data.Animal,
+        url: "_view/by_type?include_docs=true",
         parse: function(resp) {
-          console.log("GOT GAMES", resp);
-   
           return resp.rows.map(function(row) {
             return row.doc;
           });
         }
       });
+
+
+      //here is your cool view
+      var CoolView = Backbone.View.extend({
+        template: _.template($('#form-template').html()),
+        initialize: function() {
+            _.bindAll(this, 'render');
+            this.collection.bind('reset', this.render);
+        },
+        render: function() {
+          var that = this;
+          $("#main").html(this.template({}));
+          this.collection.fetch().then(function(){
+            console.log(that.collection);
+            var animals = [];
+            that.collection.each(function(animal){
+                animals.push(animal.get('name'));
+            });
+            $("#stickAnimalsHere").html(animals.join(', '));
+          });
+
+          $('#saveButton').on("click",$.proxy(this.saveanewthing, this));
+        },
+        saveanewthing: function(e){
+          e.preventDefault();
+          //make a new model that you are going to save, you can grab it from the collection. The collection knows what kind of models it's made from
+          var newthing = new this.collection.model(),
+          animal = $('#animal').val(),
+          that = this;
+          newthing.save({"name": animal,"type": "animal"},
+          {
+            success: function(model, xhr, options){
+              console.log('yay');
+            },
+            error: function(model, xhr, options){
+              console.log('boo');
+            }
+          });
+        }
+      });
+
+
+    // CALL ALL YOUR CODE.
+      //make a new collection
+      var aaaanimal = new data.Animals();
+      //make a new view
+      var theview = new CoolView({
+        collection:aaaanimal 
+      });
+      //render your new view
+      theview.render();
+
     });
+  </script>
+
+  <script type="text/template" id="form-template">
+    <input type="text" id="animal" name="animal" placeholder="add an animal"/>
+    <button type="submit" id="saveButton">Save</button>
+    <div id="stickAnimalsHere"></div>
   </script>
   </head>
   <body>
-    <div id="main"></div>
+    <div id="main">
+
+    </div>
     <div id="nope">oh hai</div>
   </body>
 </html>

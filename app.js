@@ -13,7 +13,17 @@ ddoc =
   }
   ;
 
-ddoc.views = {};
+ddoc.views = {
+  by_type: {
+    map: function(doc) {
+      if (doc.type) {
+        emit(doc.type, null);
+      }
+    }
+  }
+};
+
+
 
 // ddoc.validate_doc_update = function (newDoc, oldDoc, userCtx) {   
 //   if (newDoc._deleted === true && userCtx.roles.indexOf('_admin') === -1) {

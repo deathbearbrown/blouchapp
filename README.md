@@ -20,3 +20,8 @@ npm install couchapp
 when you want to push to couch
 
 couchapp push app.js [http of your couch repo or cloudant account]/appname
+
+
+SETTING PERMISSIONS IN CLOUDANT
+
+On the new dashboard, if you don't see 'nobody' under logged in users, add it. Set permissions to read and write.
